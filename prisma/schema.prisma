@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model bill {
+  bill_id                     Int               @id @default(autoincrement())
+  user_id                     Int
+  employee_id                 Int?
+  delivery_date               DateTime          @db.DateTime(0)
+  tax_amount                  Decimal           @db.Decimal(8, 2)
+  destination_person_name     String            @db.VarChar(80)
+  destination_person_phone    String            @db.VarChar(8)
+  destination_address         String            @db.VarChar(500)
+  destination_address_details String?           @db.VarChar(500)
+  city                        bill_city
+  dedication_msg              String?           @db.VarChar(1500)
+  order_status                bill_order_status
+  created_at                  DateTime          @db.DateTime(0)
+  updated_at                  DateTime          @db.DateTime(0)
+  user_bill_employee_idTouser user?             @relation("bill_employee_idTouser", fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "bill_ibfk_2")
+  user_bill_user_idTouser     user              @relation("bill_user_idTouser", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "bill_ibfk_1")
+  bill_detail                 bill_detail[]
+
+  @@index([employee_id], map: "employee_id")
+  @@index([user_id], map: "user_id")
+}
+
+model bill_detail {
+  bill_id    Int
+  product_id Int
+  quantity   Int     @default(1)
+  price      Decimal @db.Decimal(8, 2)
+  bill       bill    @relation(fields: [bill_id], references: [bill_id], onDelete: NoAction, onUpdate: NoAction, map: "bill_detail_ibfk_1")
+  product    product @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "bill_detail_ibfk_2")
+
+  @@id([bill_id, product_id])
+  @@index([product_id], map: "product_id")
+}
+
+model cart {
+  cart_id     Int           @id @default(autoincrement())
+  user_id     Int
+  status      cart_status?
+  created_at  DateTime      @db.DateTime(0)
+  user        user          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cart_ibfk_1")
+  cart_detail cart_detail[]
+
+  @@index([user_id], map: "user_id")
+}
+
+model cart_detail {
+  cart_id    Int
+  product_id Int
+  quantity   Int     @default(1)
+  price      Decimal @db.Decimal(8, 2)
+  cart       cart    @relation(fields: [cart_id], references: [cart_id], onDelete: NoAction, onUpdate: NoAction, map: "cart_detail_ibfk_2")
+  product    product @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "cart_detail_ibfk_1")
+
+  @@id([cart_id, product_id])
+  @@index([product_id], map: "product_id")
+}
+
+model product {
+  product_id                Int              @id @default(autoincrement())
+  product_name              String           @db.VarChar(100)
+  product_img_url           String           @db.VarChar(2500)
+  product_description_title String           @db.VarChar(255)
+  product_description       String           @db.VarChar(800)
+  price                     Decimal          @db.Decimal(8, 2)
+  status                    product_status
+  discount                  Decimal?         @db.Decimal(4, 2)
+  discount_expiration_date  DateTime?        @db.DateTime(0)
+  created_at                DateTime         @db.DateTime(0)
+  updated_at                DateTime         @db.DateTime(0)
+  total_rating              Int              @default(0)
+  bill_detail               bill_detail[]
+  cart_detail               cart_detail[]
+  product_rating            product_rating[]
+  product_tag               product_tag[]
+}
+
+model product_rating {
+  product_id  Int
+  customer_id Int
+  rating      Int     @default(1)
+  user        user    @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_rating_ibfk_1")
+  product     product @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "product_rating_ibfk_2")
+
+  @@id([product_id, customer_id])
+  @@index([customer_id], map: "customer_id")
+}
+
+model product_tag {
+  product_id Int
+  tag_id     Int
+  product    product @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "product_tag_ibfk_1")
+  tag        tag     @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "product_tag_ibfk_2")
+
+  @@id([product_id, tag_id])
+  @@index([tag_id], map: "tag_id")
+}
+
+model recovery_pin {
+  pin_id          Int      @id @default(autoincrement())
+  user_id         Int
+  pin             String   @db.Char(6)
+  created_at      DateTime @db.DateTime(0)
+  expiration_date DateTime @db.DateTime(0)
+  user            user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "recovery_pin_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model tag {
+  tag_id                   Int           @id @default(autoincrement())
+  tag_name                 String        @db.VarChar(255)
+  tag_description          String?       @db.VarChar(1500)
+  discount                 Decimal?      @db.Decimal(4, 2)
+  discount_expiration_date DateTime?     @db.DateTime(0)
+  product_tag              product_tag[]
+}
+
+model user {
+  id                          Int              @id @default(autoincrement()) @map("user_id")
+  personId                    String?          @unique(map: "person_id") @map("person_id") @db.VarChar(13)
+  birthDate                   DateTime?        @map("birth_date") @db.Date
+  userName                    String           @map("user_name") @db.VarChar(45)
+  userLastname                String           @map("user_lastname") @db.VarChar(45)
+  phoneNumber                 String?          @map("phone_number") @db.VarChar(8)
+  address                     String?          @db.VarChar(500)
+  email                       String           @unique(map: "email") @db.VarChar(255)
+  password                    String           @db.VarChar(255)
+  refreshToken                String?          @map("refresh_token") @db.VarChar(500)
+  userRole                    user_user_role   @map("user_role")
+  userStatus                  user_user_status @map("user_status")
+  createdAt                   DateTime         @map("created_at") @db.DateTime(0)
+  updatedAt                   DateTime         @map("updated_at") @db.DateTime(0)
+  bill_bill_employee_idTouser bill[]           @relation("bill_employee_idTouser")
+  bill_bill_user_idTouser     bill[]           @relation("bill_user_idTouser")
+  cart                        cart[]
+  product_rating              product_rating[]
+  recovery_pin                recovery_pin[]
+}
+
+enum bill_city {
+  TGU
+  SPS
+  DNL
+  LCE
+}
+
+enum bill_order_status {
+  recieved
+  processing
+  shipping
+  completed
+  canceled
+}
+
+enum cart_status {
+  active
+  confirmed
+  canceled
+}
+
+enum product_status {
+  ACT
+  INA
+}
+
+enum user_user_role {
+  customer
+  employee
+  admin
+}
+
+enum user_user_status {
+  ACT
+  INA
+}

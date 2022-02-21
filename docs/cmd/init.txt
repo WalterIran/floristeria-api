@@ -1,0 +1,17 @@
+->>Clone repository
+->git clone https://github.com/WalterIran/floristeria-api.git
+
+->>Install Node Dependencies
+npm install
+
+->>Create your branch, DON'T WORK ON MAIN BRANCH
+->git checkout -b <branchName>
+
+->>CREATE A COPY OF .env.template AND NAME IT AS .env AND ADD YOUR VALUES TO THE ENVIRONMENTAL VARIABLES
+
+->>Initialize Prisma
+->npx prisma generate
+->CTRL + SHIFT + P
+->Reload Window (Reloads VS CODE)
+
+->>START WORKING💪😎🖥️

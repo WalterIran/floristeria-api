@@ -4,6 +4,9 @@
 ->>Install Node Dependencies
 npm install
 
+->>Install nodemon globally
+->npm install -g nodemon
+
 ->>Create your branch, DON'T WORK ON MAIN BRANCH
 ->git checkout -b <branchName>
 
@@ -15,3 +18,4 @@ npm install
 ->Reload Window (Reloads VS CODE)
 
 ->>START WORKING💪😎🖥️
+->npm run dev

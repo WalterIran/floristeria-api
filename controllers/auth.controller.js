@@ -19,8 +19,8 @@ const mobileLogin = async (req, res, next) => {
             role: user.userRole
         }
 
-        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '30s'});
-        const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '1m'});
+        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '20m'});
+        const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
         const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
 
         await userController.updateCustomer(user.id, {refreshToken: hashRefreshToken});
@@ -59,8 +59,8 @@ const mobileRefreshToken = async (req, res, next) => {
             role: user.userRole
         }
 
-        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '1m'});
-        const newRefreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '2m'});
+        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '20m'});
+        const newRefreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
         const newHashRefreshToken = await bcrypt.hash(newRefreshToken, 10);
 
         await userController.updateCustomer(user.id, {refreshToken: newHashRefreshToken});

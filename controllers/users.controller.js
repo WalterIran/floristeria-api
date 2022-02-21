@@ -65,7 +65,7 @@ const findByEmail = async (email) => {
 }
 
 //Function to register user on database
-const registerCustomer = async (req, res) => {
+const registerCustomer = async (req, res, next) => {
     try {
         const hash = await bcrypt.hash(req.body.password, 10);
         const { userName , userLastname, email } = req.body;
@@ -74,10 +74,10 @@ const registerCustomer = async (req, res) => {
             userLastname,
             email,
             password: hash,
-            created_at: new Date(),
-            updated_at: new Date(),
-            user_role: 'customer',
-            user_status: 'ACT'
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userRole: 'customer',
+            userStatus: 'ACT'
         }
 
         const user = await userModel.create({
@@ -89,8 +89,8 @@ const registerCustomer = async (req, res) => {
             role: user.userRole
         }
 
-        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '30s'});
-        const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '1m'});
+        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '20m'});
+        const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
         
         delete user.password;
         delete user.refreshToken;

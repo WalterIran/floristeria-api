@@ -80,7 +80,7 @@ const registerCustomer = async (req, res, next) => {
             userStatus: 'ACT'
         }
 
-        const user = await userModel.create({
+        let user = await userModel.create({
             data
         });
 
@@ -91,6 +91,9 @@ const registerCustomer = async (req, res, next) => {
 
         const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '20m'});
         const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
+        const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
+
+        user = await updateCustomer(user.id, {refreshToken: hashRefreshToken});
         
         delete user.password;
         delete user.refreshToken;

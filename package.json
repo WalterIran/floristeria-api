@@ -20,6 +20,7 @@
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
-    "prisma": "^3.9.2"
+    "prisma": "^3.9.2",
+    "stripe": "^8.203.0"
   }
 }

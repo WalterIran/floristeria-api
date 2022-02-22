@@ -11,4 +11,9 @@ const authLoginSchema = Joi.object({
     password: password.required()
 });
 
-module.exports = { authLoginSchema };
+//Schema to validate client sends email for recovery pin
+const sendEmailSchema = Joi.object({
+    email: email.required()
+});
+
+module.exports = { authLoginSchema, sendEmailSchema };

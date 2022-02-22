@@ -139,14 +139,53 @@ const emailPin = async (req, res, next) => {
 
         res.status(201).json({
             status: 'ok',
-            msg: 'Pin de recuperación de contraseña enviado al correo'
+            msg: 'Pin de recuperación de contraseña enviado al correo',
+            pinExpirationDate: recoveryPin.expirationDate
         });
 
 
     } catch (error) {
-        console.error(error);
         next(error);
     }
 }
 
-module.exports = { mobileLogin, mobileRefreshToken, getUser, emailPin };
+const changePassword = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const { recoveryPin, password } = req.body;
+
+        const resultPin = await recoveryPinModel.findFirst({
+            where: {
+                AND: {
+                    userId: id,
+                    pin: recoveryPin,
+                    expirationDate: {
+                        gte: new Date()
+                    }
+                }
+            },
+            orderBy: [
+                {
+                    expirationDate: 'asc'
+                }
+            ]
+        });
+        
+        if( !resultPin ) {
+            throw boom.unauthorized();
+        }
+
+        const hashPassword = await bcrypt.hash(password, 10);
+        
+        await userController.updateCustomer(id, {
+            password: hashPassword
+        });
+        
+        res.status(200).json({status: 'ok', msg: 'Password successfully changed'});
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = { mobileLogin, mobileRefreshToken, getUser, emailPin, changePassword };

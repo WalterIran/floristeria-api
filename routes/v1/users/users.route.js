@@ -10,9 +10,10 @@ const { userRequiredId, registerCustomerSchema, updateCustomerInfoSchema } = req
 //Controller
 const userController = require('./../../../controllers/users.controller');
 
-router.get('/all', userController.findAll);
+router.get('/all', userController.findAll);//Missing authentication
 
 router.get('/byid/:id',
+    passport.authenticate('jwt', {session: false}),
     validatorHandler(userRequiredId, 'params'),
     userController.findOneUser
 );

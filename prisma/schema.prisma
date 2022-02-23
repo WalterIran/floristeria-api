@@ -31,15 +31,15 @@ model bill {
 }
 
 model bill_detail {
-  bill_id    Int
-  product_id Int
-  quantity   Int     @default(1)
-  price      Decimal @db.Decimal(8, 2)
-  bill       bill    @relation(fields: [bill_id], references: [billId], onDelete: NoAction, onUpdate: NoAction, map: "bill_detail_ibfk_1")
-  product    product @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "bill_detail_ibfk_2")
+  billId    Int     @map("bill_id")
+  productId Int     @map("product_id")
+  quantity  Int     @default(1)
+  price     Decimal @db.Decimal(8, 2)
+  bill      bill    @relation(fields: [billId], references: [billId], onDelete: NoAction, onUpdate: NoAction, map: "bill_detail_ibfk_1")
+  product   product @relation(fields: [productId], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "bill_detail_ibfk_2")
 
-  @@id([bill_id, product_id])
-  @@index([product_id], map: "product_id")
+  @@id([billId, productId])
+  @@index([productId], map: "product_id")
 }
 
 model cart {
@@ -67,7 +67,7 @@ model cart_detail {
 
 model product {
   product_id                Int              @id @default(autoincrement())
-  product_name              String           @db.VarChar(100)
+  productName               String           @unique(map: "product_name_UNIQUE") @map("product_name") @db.VarChar(100)
   product_img_url           String           @db.VarChar(2500)
   product_description_title String           @db.VarChar(255)
   product_description       String           @db.VarChar(800)
@@ -155,7 +155,7 @@ enum bill_city {
 }
 
 enum bill_order_status {
-  recieved
+  received
   processing
   shipping
   completed

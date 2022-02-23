@@ -106,14 +106,14 @@ model product_tag {
 }
 
 model recovery_pin {
-  pin_id          Int      @id @default(autoincrement())
-  user_id         Int
-  pin             String   @db.Char(6)
-  created_at      DateTime @db.DateTime(0)
-  expiration_date DateTime @db.DateTime(0)
-  user            user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "recovery_pin_ibfk_1")
+  id             Int      @id @default(autoincrement()) @map("pin_id")
+  userId         Int      @map("user_id")
+  pin            String   @db.Char(6)
+  createdAt      DateTime @map("created_at") @db.DateTime(0)
+  expirationDate DateTime @map("expiration_date") @db.DateTime(0)
+  user           user     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "recovery_pin_ibfk_1")
 
-  @@index([user_id], map: "user_id")
+  @@index([userId], map: "user_id")
 }
 
 model tag {

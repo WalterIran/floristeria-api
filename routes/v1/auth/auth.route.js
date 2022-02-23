@@ -6,7 +6,7 @@ const validatorHandler = require('./../../../middlewares/validator.handler');
 const authController = require('./../../../controllers/auth.controller');
 
 //Schemas
-const { authLoginSchema } = require('../../../schemas/auth.schema');
+const { authLoginSchema, sendEmailSchema, changePasswordSchema } = require('../../../schemas/auth.schema');
 const { userRequiredId } = require('../../../schemas/user.schema');
 
 router.post('/mobile/login', 
@@ -18,6 +18,17 @@ router.post('/mobile/login',
 router.post('/mobile/refresh-token/:id', 
     validatorHandler(userRequiredId, 'params'),
     authController.mobileRefreshToken
+);
+
+router.post('/email-pin',
+    validatorHandler(sendEmailSchema, 'body'),
+    authController.emailPin
+);
+
+router.put('/change-password/:id',
+    validatorHandler(userRequiredId, 'params'),
+    validatorHandler(changePasswordSchema, 'body'),
+    authController.changePassword
 );
 
 module.exports = router;

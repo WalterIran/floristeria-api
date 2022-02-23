@@ -69,21 +69,7 @@ const registerCustomer = async (req, res, next) => {
     try {
         const hash = await bcrypt.hash(req.body.password, 10);
         const { userName , userLastname, email } = req.body;
-        const data = {
-            userName,
-            userLastname,
-            email,
-            password: hash,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            userRole: 'customer',
-            userStatus: 'ACT'
-        }
-
-        let user = await userModel.create({
-            data
-        });
-
+        
         const payload = {
             userId: user.id,
             role: user.userRole
@@ -93,7 +79,21 @@ const registerCustomer = async (req, res, next) => {
         const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
         const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-        user = await updateCustomer(user.id, {refreshToken: hashRefreshToken});
+        const data = {
+            userName,
+            userLastname,
+            email,
+            password: hash,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userRole: 'customer',
+            userStatus: 'ACT',
+            refreshToken: hashRefreshToken
+        }
+
+        const user = await userModel.create({
+            data
+        });
         
         delete user.password;
         delete user.refreshToken;

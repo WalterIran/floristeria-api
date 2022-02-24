@@ -23,9 +23,10 @@
 2. Add your values to environmental variables
 
 ## Initialize Prisma
-1. `npx prisma generate` to install Prisma Client. You can then start querying your database.
-2. On VS Code press `CTRL + SHIFT + P` on Windows or `CMD + SHIFT + P`for macOs to open VS Code commands
-3. Choose option: _Reload Window_ (this will reload VS CODE)
+1. `npx prisma db pull` to pull database to your `schema.prisma` file.
+2. `npx prisma generate` to install Prisma Client. You can then start querying your database.
+3. On VS Code press `CTRL + SHIFT + P` on Windows or `CMD + SHIFT + P`for macOs to open VS Code commands
+4. Choose option: _Reload Window_ (this will reload VS CODE)
 
 ## START WORKING💪😎🖥️
 `npm run dev`

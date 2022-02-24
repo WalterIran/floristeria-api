@@ -8,5 +8,6 @@ router.use('/orders',
     passport.authenticate('jwt', {session: false}),
     require('./orders/orders.route')
 );
+router.use('/search', require('./search/search.route'));
 
 module.exports = router;

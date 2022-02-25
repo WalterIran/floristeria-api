@@ -2,7 +2,36 @@ const prisma = require('../config/db');
 const boom = require('@hapi/boom');
 const productModel = prisma.product;
 const cartDetailModel = prisma.cart_detail;
+const cartModel = prisma.cart;
+const userController = require('../controllers/users.controller');
+const userModel = prisma.user;
 
+//Function create shopping cart
+const createUserCart = async (req,res,next)=>{
+    try {
+        const userId = parseInt(req.params.id);
+        const carts = await cartModel.findMany({
+            where:{AND:[{
+                status:'active',
+                userId:userId,
+            }]}
+        });
+        if(carts == false){
+            const cart = await cartModel.create({
+            data:{
+                createdAt: new Date,
+                status: 'active',
+                userId,
+            }
+            });
+            res.send(cart);
+        }else{
+            res.send(carts);
+        }
+    } catch (error) {
+        next(error);
+    }
+}
 //Function add new product or increment the quantity of the same product in the cart detail
 const addProductCartDetails = async (req,res,next)=>{
     try {
@@ -47,6 +76,14 @@ const findProductById = async(producId)=>{
         where:{id}
     });
     return product;
+}
+//Function to find products by her id
+const findCartById = async(cartId)=>{
+    const id = parseInt(cartId);
+    const cart = await cartModel.findMany({
+        where:{userId:id}
+    });
+    return cart;
 }
 //Function find all the user products on the cart details
 const findUserCartDetails = async (req,res,next)=>{
@@ -145,4 +182,4 @@ const deleteProductCartDetails = async (req,res)=>{
 
 }
 
-module.exports = {addProductCartDetails,findUserCartDetails, incrementQuantityCartDetails, decrementQuantityCartDetails, deleteProductCartDetails};
+module.exports = {createUserCart,addProductCartDetails,findUserCartDetails, incrementQuantityCartDetails, decrementQuantityCartDetails, deleteProductCartDetails};

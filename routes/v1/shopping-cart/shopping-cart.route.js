@@ -5,9 +5,14 @@ const router = Router();
 const validatorHandler = require('../../../middlewares/validator.handler');
 //Schema
 const {productRequiredId,productCartId} = require('../../../schemas/shopping-cart.schema');
+const {userRequiredId} = require('../../../schemas/user.schema');
 //Controller
 const shoppingCartController = require('../../../controllers/shopping-cart.controller');
 
+
+router.get('/user/:id',
+validatorHandler(userRequiredId,'params'),
+shoppingCartController.createUserCart)
 //Add new product in the cart detail
 router.post('/:cartid/product/:productid/new',
 validatorHandler(productCartId,'params'),

@@ -1,39 +1,88 @@
-const bcrypt = require('bcrypt');
 const boom = require('@hapi/boom');
+const { bill_order_status } = require('@prisma/client');
 const prisma = require('../config/db');
 const billModel = prisma.bill;
+const billDetailModel = prisma.bill_detail;
+const stripe = require('stripe')(process.env.SECRET_STRIPE_KEY);
 
 //Function to register bill on database
 const registerBill = async (req, res, next) => {
     try {
-        const { userId , deliveryDate, taxAmount, destinationPersonName, destinationPersonPhone,
-        destinationAddress, destinationAddressDetails, city, dedicationMsg } = req.body;
+        const { user_id , delivery_date, tax_amount, destination_person_name, destination_person_phone,
+            destination_address, destination_address_details, city, dedication_msg } = req.body;
 
-        await billModel.create({
-            user_id: userId,
-            delivery_date: deliveryDate,
-            tax_amount: taxAmount,
-            destination_person_name: destinationPersonName,
-            destination_person_phone: destinationPersonPhone,
-            destination_address: destinationAddress,
-            destination_address_details: destinationAddressDetails,
-            city: city,
-            dedication_msg: dedicationMsg,
-            order_status: 'received',
-            created_at: new Date(),
-            updated_at: new Date(),
+        const bill = await billModel.create({
+            data:{
+                user_id,
+                delivery_date: new Date(delivery_date),
+                tax_amount,
+                destination_person_name,
+                destination_person_phone,
+                destination_address,
+                destination_address_details,
+                city,
+                dedication_msg,
+                order_status: bill_order_status.processing,
+                created_at: new Date(),
+                updated_at: new Date()
+            }
         })
-        .then((data) => {
-            console.log(data);
-            res.send("Compra procesada con exito");
-        })
-        .catch((error) => {
-            console.log(error);
-            res.send("Error al procesar la compra");
-        });
+        if(!bill){
+            throw boom.notFound()
+        }
+        else{
+            res.send("Factura guardado");
+        }
     } catch (error) {
         next(error);
     }
 }
 
-module.exports = {registerBill};
+//Function to insert a product on bill_detail
+const AddBilldetail = async (req, res, next) => {
+    try{
+        const { bill_id, product_id, quantity, price } = req.body;
+
+        const billDetail = await billDetailModel.create({
+            data:{
+                bill_id,
+                product_id,
+                quantity,
+                price
+            }
+        });
+        if(!billDetail){
+            throw boom.notFound();
+        }
+        else{
+            res.send("El producto fue añadido con exito")
+        }
+    }
+    catch(error){
+        next(error);
+    }
+}
+
+//do payment with Stripe
+const doPayment = async (req, res, next) => {
+    try{
+      const customer = await stripe.customers.create({
+        email: 'YOUR_EMAILtest@test.com',
+        source: req.body.tokenId
+      })
+      const result = await stripe.charges.create({
+          amount: req.body.amount, // Unit: cents
+          currency: 'usd',
+          customer: customer.id,
+          source: customer.default_source.id,
+          description: 'Test payment',
+        })
+        res.status(200).json(result);
+    }
+    catch(error){
+      console.error(error);
+      next(error);
+    }
+  }
+
+module.exports = {registerBill, AddBilldetail, doPayment};

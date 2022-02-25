@@ -67,7 +67,7 @@ model cart_detail {
 
 model product {
   product_id                Int              @id @default(autoincrement())
-  product_name              String           @db.VarChar(100)
+  product_name              String           @unique(map: "product_name_UNIQUE") @db.VarChar(100)
   product_img_url           String           @db.VarChar(2500)
   product_description_title String           @db.VarChar(255)
   product_description       String           @db.VarChar(800)
@@ -155,7 +155,7 @@ enum bill_city {
 }
 
 enum bill_order_status {
-  recieved
+  received
   processing
   shipping
   completed

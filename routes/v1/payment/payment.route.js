@@ -1,5 +1,8 @@
 const router = require('express').Router();
 
+//Controllers
+const paymentController = require('../../../controllers/payment.controller');
+
 //Stripe
 const stripe = require('stripe')(process.env.SECRET_STRIPE_KEY);
 
@@ -23,5 +26,7 @@ router.post('/doPayment/', async (req, res, next) => {
     next(error);
   }
 });
+
+router.post('/registerbill/', paymentController.registerBill);
 
 module.exports = router;

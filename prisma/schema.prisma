@@ -85,24 +85,24 @@ model product {
 }
 
 model product_rating {
-  product_id  Int
-  customer_id Int
-  rating      Int     @default(1)
-  user        user    @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_rating_ibfk_1")
-  product     product @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_rating_ibfk_2")
+  productId  Int     @map("product_id")
+  customerId Int     @map("customer_id")
+  rating     Int     @default(1)
+  user       user    @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_rating_ibfk_1")
+  product    product @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_rating_ibfk_2")
 
-  @@id([product_id, customer_id])
-  @@index([customer_id], map: "customer_id")
+  @@id([productId, customerId])
+  @@index([customerId], map: "customer_id")
 }
 
 model product_tag {
-  product_id Int
-  tag_id     Int
-  product    product @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_tag_ibfk_1")
-  tag        tag     @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "product_tag_ibfk_2")
+  productId Int     @map("product_id")
+  tagId     Int     @map("tag_id")
+  product   product @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_tag_ibfk_1")
+  tag       tag     @relation(fields: [tagId], references: [tagId], onDelete: NoAction, onUpdate: NoAction, map: "product_tag_ibfk_2")
 
-  @@id([product_id, tag_id])
-  @@index([tag_id], map: "tag_id")
+  @@id([productId, tagId])
+  @@index([tagId], map: "tag_id")
 }
 
 model recovery_pin {
@@ -117,12 +117,12 @@ model recovery_pin {
 }
 
 model tag {
-  tag_id                   Int           @id @default(autoincrement())
-  tag_name                 String        @db.VarChar(255)
-  tag_description          String?       @db.VarChar(1500)
-  discount                 Decimal?      @db.Decimal(4, 2)
-  discount_expiration_date DateTime?     @db.DateTime(0)
-  product_tag              product_tag[]
+  tagId                  Int           @id @default(autoincrement()) @map("tag_id")
+  tagName                String        @map("tag_name") @db.VarChar(255)
+  tagDescription         String?       @map("tag_description") @db.VarChar(1500)
+  discount               Decimal?      @db.Decimal(4, 2)
+  discountExpirationDate DateTime?     @map("discount_expiration_date") @db.DateTime(0)
+  product_tag            product_tag[]
 }
 
 model user {

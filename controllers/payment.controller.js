@@ -39,7 +39,7 @@ const registerBill = async (req, res, next) => {
                     AND:[
                         {
                             status:'active',
-                            user_id: userId
+                            userId: userId
                         }
                     ]
                 },
@@ -51,12 +51,12 @@ const registerBill = async (req, res, next) => {
             //Add bill detail
             const cartDetail = await cartDetailModel.findMany({
                 where:{
-                    cart_id: cartId
+                    cartId: cartId
                 }
             })
 
             const data = cartDetail.map(detail => {
-                delete detail.cart_id;
+                delete detail.cartId;
                 detail.billId = bill.billId;
                 return detail
             })

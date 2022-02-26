@@ -149,4 +149,34 @@ const updateCustomer = async (id, changes) => {
     return user;
 }
 
-module.exports = { findAll, findOneUser, findById, findByEmail, registerCustomer, updateOneCustomer, updateCustomer };
+const inactivateUser = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+
+        //PART OF CRUD EVALUATION
+        // const result = await userModel.delete({
+        //     where: {
+        //         id
+        //     }
+        // });
+
+        const result = await userModel.update({
+            where: {
+                id
+            },
+            data: {
+                userStatus: 'INA'
+            }
+        });
+
+        res.status(200).json({
+            status: 'ok',
+            msg: `User ${result.userName} ${result.userLastname} inactivated successfully`,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+module.exports = { findAll, findOneUser, findById, findByEmail, registerCustomer, updateOneCustomer, updateCustomer, inactivateUser };

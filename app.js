@@ -23,4 +23,8 @@ app.use(ormErrorHandler);
 app.use(boomErrorHandler);
 app.use(errorHandler);
 
+app.use('*', function(req, res){
+    res.status(404).json({status: 'failed', msg: "Doesn't exists"});
+});
+
 module.exports = app;

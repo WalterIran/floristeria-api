@@ -1,3 +1,4 @@
+const boom = require('@hapi/boom');
 const passport = require('passport');
 const { Strategy } = require('passport-local');
 
@@ -13,6 +14,11 @@ const options = {
 const LocalStrategy = new Strategy(options, async (email, password, done) => {
     try {
         const user = await authController.getUser(email, password);
+
+        if (user.userStatus === 'INA') {
+            throw boom.unauthorized();
+        }
+
         done(null, user);
     } catch (error) {
         done(error, false);

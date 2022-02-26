@@ -1,9 +1,13 @@
 const boom = require('@hapi/boom');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { transporter } = require('../config/mail.config');
 
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 const secretRefreshKey = process.env.SECRETE_REFRESH_KEY;
+
+const prisma = require('../config/db');
+const recoveryPinModel = prisma.recovery_pin;
 
 //Controller
 const userController = require('./users.controller');
@@ -89,4 +93,99 @@ const getUser = async (email, password) => {
     return user;
 }
 
-module.exports = { mobileLogin, mobileRefreshToken, getUser };
+const emailPin = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const user = await userController.findByEmail(email);
+
+        if (!user) {
+            throw boom.notFound();
+        }
+
+        const pin = Math.floor(Math.random() * 999999 + 100000).toString();
+
+        const recoveryPin = await recoveryPinModel.create({
+            data: {
+                userId: user.id,
+                pin,
+                createdAt: new Date(),
+                expirationDate: new Date(new Date().getTime() + 5*60000)
+            }
+        });
+
+        await transporter.sendMail({
+            from: 'Interflora',
+            to: user.email,
+            subject: 'Interflora App - Pin de recuperación de contraseña',
+            html: `
+            <div style="font-family:Roboto,sans-serif; border:1px solid #838383;max-width:600px;width:90%;padding:.7rem;padding-bottom: 2rem;margin:.7rem auto;
+            border-radius:1rem;box-shadow:0 2px 4px #aaa">
+                <div style="text-align: center;">
+                    <h1 style="font-style: italic;color:#bfa658;">INTERFLORA</h1>
+                </div>
+                <div style="text-align: center;">
+                    <h2 style="margin:1rem 0; color:#333;font-size:2rem;">Oops!</h2>
+                    <p style="margin:1rem 0; color:#666" >
+                        Hola ${user.userName}, parece que has olvidado tu contraseña
+                    </p>
+                    <h3 style="margin:1rem 0; color:#333;font-size:2rem" class="content-title">Pin de recuperación</h3>
+                    <p style="margin:1rem 0; letter-spacing:1rem;font-size:3rem;color:#bfa658;">${recoveryPin.pin}</p>
+                    <p style="margin-top:1rem; margin:0;font-size:.8rem;color:#aaa" >Ingresa este pin en la aplicación para poder cambiar tu contraseña</p>
+                    <p style="margin:0;font-size:.8rem;color:#aaa">Si no solicitaste el pin de recuperación puedes ignorar este mensaje</p>
+                </div>
+            </div>
+            `
+        });
+
+        res.status(201).json({
+            status: 'ok',
+            msg: 'Pin de recuperación de contraseña enviado al correo',
+            pinExpirationDate: recoveryPin.expirationDate
+        });
+
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+const changePassword = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const { recoveryPin, password } = req.body;
+
+        const resultPin = await recoveryPinModel.findFirst({
+            where: {
+                AND: {
+                    userId: id,
+                    pin: recoveryPin,
+                    expirationDate: {
+                        gte: new Date()
+                    }
+                }
+            },
+            orderBy: [
+                {
+                    expirationDate: 'asc'
+                }
+            ]
+        });
+        
+        if( !resultPin ) {
+            throw boom.unauthorized();
+        }
+
+        const hashPassword = await bcrypt.hash(password, 10);
+        
+        await userController.updateCustomer(id, {
+            password: hashPassword
+        });
+        
+        res.status(200).json({status: 'ok', msg: 'Password successfully changed'});
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = { mobileLogin, mobileRefreshToken, getUser, emailPin, changePassword };

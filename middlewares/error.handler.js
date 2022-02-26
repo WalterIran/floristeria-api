@@ -21,8 +21,9 @@ function boomErrorHandler(err, req, res, next) {
 
     const { output } = err;
     res.status(output.statusCode).json(output.payload);
+  }else{
+    next(err);
   }
-  next(err);
 }
 
 //Middleware to handle Prisma ORM errors
@@ -33,8 +34,9 @@ function ormErrorHandler(err, req, res, next) {
       message: err.name,
       errors: err.meta.cause
     });
+  }else{
+    next(err);
   }
-  next(err);
 }
 
 

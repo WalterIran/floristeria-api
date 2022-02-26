@@ -8,23 +8,23 @@ const stripe = require('stripe')(process.env.SECRET_STRIPE_KEY);
 //Function to register bill on database
 const registerBill = async (req, res, next) => {
     try {
-        const { user_id , delivery_date, tax_amount, destination_person_name, destination_person_phone,
-            destination_address, destination_address_details, city, dedication_msg } = req.body;
+        const { userId , deliveryDate, taxAmount, destinationPersonName, destinationPersonPhone,
+            destinationAddress, destinationAddressDetails, city, dedicationMsg } = req.body;
 
         const bill = await billModel.create({
             data:{
-                user_id,
-                delivery_date: new Date(delivery_date),
-                tax_amount,
-                destination_person_name,
-                destination_person_phone,
-                destination_address,
-                destination_address_details,
+                userId,
+                deliveryDate: new Date(deliveryDate),
+                taxAmount,
+                destinationPersonName,
+                destinationPersonPhone,
+                destinationAddress,
+                destinationAddressDetails,
                 city,
-                dedication_msg,
-                order_status: bill_order_status.processing,
-                created_at: new Date(),
-                updated_at: new Date()
+                dedicationMsg,
+                orderStatus: bill_order_status.processing,
+                createdAt: new Date(),
+                updatedAt: new Date()
             }
         })
         if(!bill){
@@ -43,10 +43,22 @@ const AddBilldetail = async (req, res, next) => {
     try{
         const { bill_id, product_id, quantity, price } = req.body;
 
-        const billDetail = await billDetailModel.create({
-            data:{
-                bill_id,
-                product_id,
+        const billDetail = await billDetailModel.upsert({
+            where:{
+                billId_productId:{
+                    billId, productId
+                }
+            },
+            update:{
+                quantity:{increment:quantity}
+            },
+            create:{
+                bill:{
+                    connect:{billId:billId}
+                },
+                product:{
+                    connect:{productId:productId}
+                },
                 quantity,
                 price
             }

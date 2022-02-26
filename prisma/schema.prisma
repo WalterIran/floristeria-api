@@ -43,26 +43,26 @@ model bill_detail {
 }
 
 model cart {
-  cart_id     Int           @id @default(autoincrement())
-  user_id     Int
+  id          Int           @id @default(autoincrement()) @map("cart_id")
+  userId      Int           @map("user_id")
   status      cart_status?
-  created_at  DateTime      @db.DateTime(0)
-  user        user          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cart_ibfk_1")
+  createdAt   DateTime      @map("created_at") @db.DateTime(0)
+  user        user          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cart_ibfk_1")
   cart_detail cart_detail[]
 
-  @@index([user_id], map: "user_id")
+  @@index([userId], map: "user_id")
 }
 
 model cart_detail {
-  cart_id    Int
-  product_id Int
-  quantity   Int     @default(1)
-  price      Decimal @db.Decimal(8, 2)
-  cart       cart    @relation(fields: [cart_id], references: [cart_id], onDelete: NoAction, onUpdate: NoAction, map: "cart_detail_ibfk_2")
-  product    product @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cart_detail_ibfk_1")
+  cartId    Int     @map("cart_id")
+  productId Int     @map("product_id")
+  quantity  Int     @default(1)
+  price     Decimal @db.Decimal(8, 2)
+  cart      cart    @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cart_detail_ibfk_2")
+  product   product @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cart_detail_ibfk_1")
 
-  @@id([cart_id, product_id])
-  @@index([product_id], map: "product_id")
+  @@id([cartId, productId])
+  @@index([productId], map: "product_id")
 }
 
 model product {

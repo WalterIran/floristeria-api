@@ -55,14 +55,14 @@ model cart {
 
 model cart_detail {
   cart_id    Int
-  product_id Int
+  productId  Int     @map("product_id")
   quantity   Int     @default(1)
   price      Decimal @db.Decimal(8, 2)
   cart       cart    @relation(fields: [cart_id], references: [cart_id], onDelete: NoAction, onUpdate: NoAction, map: "cart_detail_ibfk_2")
-  product    product @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cart_detail_ibfk_1")
+  product    product @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cart_detail_ibfk_1")
 
-  @@id([cart_id, product_id])
-  @@index([product_id], map: "product_id")
+  @@id([cart_id, productId])
+  @@index([productId], map: "product_id")
 }
 
 model product {

@@ -3,6 +3,7 @@ const Joi = require('joi');
 const billId = Joi.number().integer();
 const userId = Joi.number().integer();
 const productId = Joi.number().integer();
+const cartId = Joi.number().integer();
 const deliveryDate = Joi.date();
 const taxAmount = Joi.number();
 const destinationPersonName = Joi.string();
@@ -24,13 +25,7 @@ const registerBillSchema = Joi.object({
     destinationAddressDetails: destinationAddressDetails.required(),
     dedicationMsg: dedicationMsg.required(),
     city: city.required(),
+    cartId: cartId.required()
 });
 
-const registerBillDetailSchema = Joi.object({
-    billId: billId.required(),
-    productId: productId.required(),
-    quantity: quantity.required(),
-    price: price.required()
-});
-
-module.exports = {registerBillDetailSchema, registerBillSchema};
+module.exports = { registerBillSchema };

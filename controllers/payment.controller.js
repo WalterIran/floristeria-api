@@ -4,13 +4,14 @@ const prisma = require('../config/db');
 const billModel = prisma.bill;
 const billDetailModel = prisma.bill_detail;
 const cartModel = prisma.cart;
+const cartDetailModel = prisma.cart_detail;
 const stripe = require('stripe')(process.env.SECRET_STRIPE_KEY);
 
 //Function to register bill on database
 const registerBill = async (req, res, next) => {
     try {
         const { userId , deliveryDate, taxAmount, destinationPersonName, destinationPersonPhone,
-            destinationAddress, destinationAddressDetails, city, dedicationMsg } = req.body;
+            destinationAddress, destinationAddressDetails, city, dedicationMsg, cartId } = req.body;
 
         const bill = await billModel.create({
             data:{
@@ -23,7 +24,7 @@ const registerBill = async (req, res, next) => {
                 destinationAddressDetails,
                 city,
                 dedicationMsg,
-                orderStatus: bill_order_status.processing,
+                orderStatus: bill_order_status.received,
                 createdAt: new Date(),
                 updatedAt: new Date()
             }
@@ -32,57 +33,41 @@ const registerBill = async (req, res, next) => {
             throw boom.notFound()
         }
         else{
+            //Delete actives cart
             const cart = await cartModel.updateMany({
                 where:{
-                    AND:[{
-                        status:'active',
-                        user_id: userId
-                    }]
+                    AND:[
+                        {
+                            status:'active',
+                            user_id: userId
+                        }
+                    ]
                 },
                 data:{
                     status: 'canceled'
                 }
             })
+
+            //Add bill detail
+            const cartDetail = await cartDetailModel.findMany({
+                where:{
+                    cart_id: cartId
+                }
+            })
+
+            const data = cartDetail.map(detail => {
+                delete detail.cart_id;
+                detail.billId = bill.billId;
+                return detail
+            })
+
+            const billDetail = await billDetailModel.createMany({
+                data
+            })
+
             res.send("Factura procesada con exito");
         }
     } catch (error) {
-        next(error);
-    }
-}
-
-//Function to insert a product on bill_detail
-const AddBilldetail = async (req, res, next) => {
-    try{
-        const { billId, productId, quantity, price } = req.body;
-
-        const billDetail = await billDetailModel.upsert({
-            where:{
-                billId_productId:{
-                    billId, productId
-                }
-            },
-            update:{
-                quantity:{increment:quantity}
-            },
-            create:{
-                bill:{
-                    connect:{billId:billId}
-                },
-                product:{
-                    connect:{id:productId}
-                },
-                quantity,
-                price
-            }
-        });
-        if(!billDetail){
-            throw boom.notFound();
-        }
-        else{
-            res.send("El producto fue añadido con exito")
-        }
-    }
-    catch(error){
         next(error);
     }
 }
@@ -91,7 +76,7 @@ const AddBilldetail = async (req, res, next) => {
 const doPayment = async (req, res, next) => {
     try{
       const customer = await stripe.customers.create({
-        email: 'YOUR_EMAILtest@test.com',
+        email: req.body.emailUser,
         source: req.body.tokenId
       })
       const result = await stripe.charges.create({
@@ -99,7 +84,7 @@ const doPayment = async (req, res, next) => {
           currency: 'usd',
           customer: customer.id,
           source: customer.default_source.id,
-          description: 'Test payment',
+          description: req.body.description,
         })
         res.status(200).json(result);
     }
@@ -109,4 +94,4 @@ const doPayment = async (req, res, next) => {
     }
   }
 
-module.exports = {registerBill, AddBilldetail, doPayment};
+module.exports = {registerBill, doPayment};

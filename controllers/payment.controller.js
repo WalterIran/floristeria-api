@@ -3,6 +3,7 @@ const { bill_order_status } = require('@prisma/client');
 const prisma = require('../config/db');
 const billModel = prisma.bill;
 const billDetailModel = prisma.bill_detail;
+const cartModel = prisma.cart;
 const stripe = require('stripe')(process.env.SECRET_STRIPE_KEY);
 
 //Function to register bill on database
@@ -31,7 +32,18 @@ const registerBill = async (req, res, next) => {
             throw boom.notFound()
         }
         else{
-            res.send("Factura guardado");
+            const cart = await cartModel.updateMany({
+                where:{
+                    AND:[{
+                        status:'active',
+                        user_id: userId
+                    }]
+                },
+                data:{
+                    status: 'canceled'
+                }
+            })
+            res.send("Factura procesada con exito");
         }
     } catch (error) {
         next(error);
@@ -41,7 +53,7 @@ const registerBill = async (req, res, next) => {
 //Function to insert a product on bill_detail
 const AddBilldetail = async (req, res, next) => {
     try{
-        const { bill_id, product_id, quantity, price } = req.body;
+        const { billId, productId, quantity, price } = req.body;
 
         const billDetail = await billDetailModel.upsert({
             where:{
@@ -57,7 +69,7 @@ const AddBilldetail = async (req, res, next) => {
                     connect:{billId:billId}
                 },
                 product:{
-                    connect:{productId:productId}
+                    connect:{id:productId}
                 },
                 quantity,
                 price

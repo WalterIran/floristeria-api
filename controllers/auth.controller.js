@@ -54,6 +54,10 @@ const mobileRefreshToken = async (req, res, next) => {
         const dbRefreshToken = user.refreshToken;
         const isMatch = await bcrypt.compare(sentRefreshToken, dbRefreshToken);
 
+        if(user.userStatus === 'INA') {
+            throw boom.unauthorized();
+        }
+
         if (!isMatch) {
             throw boom.unauthorized();
         }

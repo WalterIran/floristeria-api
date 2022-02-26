@@ -5,7 +5,7 @@ const passport = require('passport');
 const validatorHandler = require('./../../../middlewares/validator.handler');
 
 //Schemas
-const { userRequiredId, registerCustomerSchema, updateCustomerInfoSchema } = require('./../../../schemas/user.schema');
+const { userRequiredId, registerCustomerSchema, updateCustomerInfoSchema, inactivateUser } = require('./../../../schemas/user.schema');
 
 //Controller
 const userController = require('./../../../controllers/users.controller');
@@ -28,6 +28,12 @@ router.patch('/update-customer/:id',
     validatorHandler(userRequiredId, 'params'),
     validatorHandler(updateCustomerInfoSchema, 'body'),
     userController.updateOneCustomer
+);
+
+router.delete('/inactivate-user/:id',
+    passport.authenticate('jwt', {session: false}),
+    validatorHandler(userRequiredId, 'params'),
+    userController.inactivateUser
 );
 
 module.exports = router;

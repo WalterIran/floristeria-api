@@ -22,6 +22,7 @@ const sendEmailSchema = Joi.object({
 
 //Schema to validate change password
 const changePasswordSchema = Joi.object({
+    email: email.required(),
     recoveryPin: recoveryPin.required(),
     password: password.required(),
     repeatPassword: repeatPassword.required()

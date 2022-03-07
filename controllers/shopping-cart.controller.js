@@ -29,7 +29,7 @@ const createUserCart = async (req,res,next)=>{
             });
             res.send(cart);
         }else{
-            res.send("There's a active cart.");
+            res.status(200).json({cartId: carts[0].id});
         }
     } catch (error) {
         next(error);

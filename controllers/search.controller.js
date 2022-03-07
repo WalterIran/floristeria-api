@@ -15,7 +15,7 @@ const searching = async (req, res, next) => {
                         },
                     },
                     {
-                        product_description_title: {
+                        productDescriptionTitle: {
                             contains: search
                         }
                     },
@@ -23,7 +23,7 @@ const searching = async (req, res, next) => {
                         product_tag: {
                             some:{
                                 tag: {
-                                    tag_name: {
+                                    tagName: {
                                         contains: search
                                     }
                                 }

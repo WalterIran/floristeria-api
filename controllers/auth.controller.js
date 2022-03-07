@@ -23,7 +23,7 @@ const mobileLogin = async (req, res, next) => {
             role: user.userRole
         }
 
-        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '20m'});
+        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '5d'});
         const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
         const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
 
@@ -67,15 +67,16 @@ const mobileRefreshToken = async (req, res, next) => {
             role: user.userRole
         }
 
-        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '20m'});
+        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '5d'});
         const newRefreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
         const newHashRefreshToken = await bcrypt.hash(newRefreshToken, 10);
 
-        await userController.updateCustomer(user.id, {refreshToken: newHashRefreshToken});
+        const userUpt = await userController.updateCustomer(user.id, {refreshToken: newHashRefreshToken});
 
         res.status(200).json({
             accessToken,
-            refreshToken: newRefreshToken
+            refreshToken: newRefreshToken,
+            user: userUpt
         });
 
     } catch (error) {
@@ -155,18 +156,22 @@ const emailPin = async (req, res, next) => {
 
 const changePassword = async (req, res, next) => {
     try {
-        const id = parseInt(req.params.id);
-        const { recoveryPin, password } = req.body;
-
+        const { recoveryPin, password, email } = req.body;
+        console.log(req.body);
         const resultPin = await recoveryPinModel.findFirst({
             where: {
                 AND: {
-                    userId: id,
                     pin: recoveryPin,
                     expirationDate: {
                         gte: new Date()
+                    },
+                    user: {
+                        email: email
                     }
                 }
+            },
+            include: {
+                user: true
             },
             orderBy: [
                 {
@@ -174,14 +179,14 @@ const changePassword = async (req, res, next) => {
                 }
             ]
         });
-        
+        console.log('AQUIIIII')
         if( !resultPin ) {
             throw boom.unauthorized();
         }
 
         const hashPassword = await bcrypt.hash(password, 10);
         
-        await userController.updateCustomer(id, {
+        await userController.updateCustomer(resultPin.user.id, {
             password: hashPassword
         });
         

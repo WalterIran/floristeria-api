@@ -25,8 +25,7 @@ router.post('/email-pin',
     authController.emailPin
 );
 
-router.put('/change-password/:id',
-    validatorHandler(userRequiredId, 'params'),
+router.put('/change-password',
     validatorHandler(changePasswordSchema, 'body'),
     authController.changePassword
 );

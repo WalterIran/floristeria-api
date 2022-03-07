@@ -166,8 +166,8 @@ const orderDetail = async (req, res, next) => {
             throw boom.notFound();
         }
 
-        order.subtotal = order.bill_detail.map(prod => parseFloat(prod.price)).reduce((prev, next) => prev + next);
-        order.total = order.subtotal + order.taxAmount;
+        order.subtotal = order.bill_detail.map(prod => parseFloat(prod.price * prod.quantity)).reduce((prev, next) => prev + next);
+        order.total = parseFloat(order.subtotal) + parseFloat(order.taxAmount);
 
         res.status(200).json({
             status: 'ok',

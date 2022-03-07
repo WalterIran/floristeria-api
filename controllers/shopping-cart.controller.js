@@ -119,11 +119,7 @@ const findUserCartDetails = async (req,res,next)=>{
                 }
             }
         });
-        if(cartDetails == false){
-            throw boom.notFound();
-        }else{
-            res.send(cartDetails);
-        }
+        res.send(cartDetails);
     } catch (error) {
         next(error);
     }

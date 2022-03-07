@@ -112,7 +112,7 @@ const findUserCartDetails = async (req,res,next)=>{
             },
             include:{
                 product: {
-                    select:{name:true,image:true}
+                    select:{productName:true,productImgUrl:true}
                 },
                 cart:{
                     select:{userId:true}

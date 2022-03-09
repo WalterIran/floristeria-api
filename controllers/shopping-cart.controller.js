@@ -27,7 +27,7 @@ const createUserCart = async (req,res,next)=>{
                 userId,
             }
             });
-            res.send(cart);
+            res.status(200).json(cart);
         }else{
             res.status(200).json({cartId: carts[0].id});
         }
@@ -119,7 +119,7 @@ const findUserCartDetails = async (req,res,next)=>{
                 }
             }
         });
-        res.send(cartDetails);
+        res.status(200).json(cartDetails);
     } catch (error) {
         next(error);
     }
@@ -143,7 +143,7 @@ const incrementQuantityCartDetails = async (req,res,next)=>{
         if(!cartDetails){
             throw boom.notFound();
         }
-        res.send(cartDetails);
+        res.status(200).json(cartDetails);
 
     } catch (error) {
         next(error);
@@ -174,11 +174,8 @@ const decrementQuantityCartDetails = async (req,res,next)=>{
         if(cartDetails == false){
             throw boom.badRequest();
         }
-        if(cartDetails.count > 0){
-            res.send('Decrement successfully');
-        }else{
-            throw boom.notFound();
-        }
+
+        res.status(200).json(cartDetails);
         
         } catch (error) {
             next(error)
@@ -200,8 +197,7 @@ const deleteProductCartDetails = async (req,res,next)=>{
             if(!cartDetails){
                 throw boom.notFound();
             }else{
-                res.send('Product cancelled.');
-                console.log(cartDetails);
+                res.status(200).json({deleteCount: 1});
             }
        } catch (error) {
            next(error);

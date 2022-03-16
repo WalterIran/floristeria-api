@@ -40,6 +40,8 @@ const addProductCartDetails = async (req,res,next)=>{
     try {
         const cartId = parseInt(req.params.cartid);
         const productId = parseInt(req.params.productid);
+        const sentPrice = parseFloat(req.body.price);
+
         const carts= await cartModel.findMany({
             where:{AND:[{
                 status:'active',
@@ -58,7 +60,7 @@ const addProductCartDetails = async (req,res,next)=>{
             },
             update:{
                 productId,
-                price:product.price,
+                price: sentPrice,
                 quantity:{increment:1}
             },
             create:{
@@ -69,7 +71,7 @@ const addProductCartDetails = async (req,res,next)=>{
                     connect:{id:cartId}
                 },
                 quantity:1,
-                price:product.price
+                price:sentPrice
             }
         });
         if(!cartDetails){

@@ -10,6 +10,13 @@ const findProduct = async (req, res, next) => {
         const product = await productModel.findUnique({
             where: {
                 id
+            },
+            include: {
+                product_tag: {
+                    include: {
+                        tag: true
+                    }
+                }
             }
         });
 

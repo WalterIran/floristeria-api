@@ -110,5 +110,131 @@ const updateoneProduct = async (req, res, next) => {
  }
 }
 
+//Get newest products
+const findNewestProducts = async (req, res, next) => {
+    try {
+        const limit = parseInt(req.query.limit) || 6;
 
-module.exports = { findProduct, deleteProduct, createProduct,updateoneProduct};
+        const products = await productModel.findMany({
+            take: limit,
+            orderBy: [
+                {
+                    createdAt: 'desc'
+                }
+            ],
+            include: {
+                product_tag:{
+                    include:{
+                        tag: true
+                    }
+                }
+            }
+        });
+
+        res.status(200).json({
+            status: 'ok',
+            products
+        })
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+//Get discount products
+const findDiscountProducts = async (req, res, next) => {
+    try {
+        const limit = parseInt(req.query.limit) || 6;
+
+        const products = await productModel.findMany({
+            where: { 
+                OR: [
+                    {
+                        AND: [
+                            { 
+                                NOT: {
+                                    discount: null 
+                                }
+                            },
+                            {
+                                NOT: {
+                                    discountExpirationDate: null 
+                                }
+                            },
+                            {
+                                NOT: {
+                                    discountExpirationDate: {
+                                        gt: new Date()
+                                    } 
+                                }
+                            },
+                        ]
+                    },
+                    {
+                        AND:[
+                            {
+                                product_tag:{
+                                    some: {
+                                        tag:{
+                                            NOT: {
+                                                discount : null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                product_tag:{
+                                    some: {
+                                        tag:{
+                                            NOT: {
+                                                discountExpirationDate : null
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                product_tag:{
+                                    some: {
+                                        tag:{
+                                            NOT: {
+                                                discountExpirationDate : {
+                                                    gt: new Date()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                        ]
+                    }
+                ]
+            },
+            include: {
+                product_tag:{
+                    include: {
+                        tag:true
+                    }
+                }
+            },
+            take: limit,
+            orderBy: [
+                {
+                    discount: 'desc'
+                }
+            ]
+        });
+
+        res.status(200).json({
+            status: 'ok',
+            products
+        })
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+module.exports = { findProduct, findNewestProducts, findDiscountProducts, deleteProduct, createProduct, updateoneProduct};

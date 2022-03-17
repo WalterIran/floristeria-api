@@ -12,6 +12,14 @@ router.get('/byid/:id',
     productController.findProduct
 );
 
+router.get('/newest',
+    productController.findNewestProducts
+);
+
+router.get('/with-discount',
+    productController.findDiscountProducts
+);
+
 router.delete('/delete/:id',
     passport.authenticate('jwt', {session: false}),
     validatorHandler(productDeleteSchema, 'params'),

@@ -18,6 +18,10 @@ const mobileLogin = async (req, res, next) => {
     try {
         const user = req.user;
 
+        if(req.query.logintype === 'admin' && user.userRole === 'customer') {
+            throw boom.unauthorized();
+        }
+
         const payload = {
             userId: user.id,
             role: user.userRole
@@ -179,7 +183,7 @@ const changePassword = async (req, res, next) => {
                 }
             ]
         });
-        console.log('AQUIIIII')
+        
         if( !resultPin ) {
             throw boom.unauthorized();
         }

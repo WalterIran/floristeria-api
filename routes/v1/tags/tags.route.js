@@ -18,8 +18,8 @@ router.patch('/updateTag/:tagId',
 );
 
 router.post('/createTags',
-validatorHandler(createTagsSchema, 'body'),
-tagsController.createTag
+    validatorHandler(createTagsSchema, 'body'),
+    tagsController.createTag
 );
 
 module.exports  = router;

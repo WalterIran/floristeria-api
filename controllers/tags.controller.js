@@ -5,7 +5,7 @@ const tagsModel = prisma.tag;
 const findAllTags = async (req,res,next) =>{
     try {
         const tag = await tagsModel.findMany();
-        res.send(tag);
+        res.status(200).json(tag);
     } catch (error) {
         console.log(error)
         next(error);

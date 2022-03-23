@@ -141,6 +141,131 @@ const userConfirmedOrders = async (req, res, next) => {
     }
 }
 
+const allPendingOrders = async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const orders = await orderModel.findMany({
+            where: {
+                OR: [
+                    {
+                        orderStatus: 'processing'
+                    },
+                    {
+                        orderStatus: 'received'
+                    },
+                    {
+                        orderStatus: 'shipping'
+                    }
+                ]
+            },
+            skip: offset,
+            take: limit,
+            orderBy: [
+                {
+                    deliveryDate: 'desc'
+                }
+            ]
+        });
+
+        const ordersCount = await orderModel.count({
+            where: {
+                OR: [
+                    {
+                        orderStatus: 'processing'
+                    },
+                    {
+                        orderStatus: 'received'
+                    },
+                    {
+                        orderStatus: 'shipping'
+                    }
+                ]
+            }
+        });
+
+        const totalPages = Math.ceil(ordersCount/limit);
+
+        const pagination = {
+            totalItems: ordersCount,
+            nextPage: page >= totalPages - 1 ? null : page + 1,
+            limit,
+            totalPages
+        }
+        
+        res.status(200).json({
+            status: 'ok',
+            pagination,
+            orders
+        });
+
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+const allConfirmedOrders = async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const orders = await orderModel.findMany({
+            where: {
+                OR: [
+                    {
+                        orderStatus: 'completed'
+                    },
+                    {
+                        orderStatus: 'canceled'
+                    }
+                ]
+            },
+            skip: offset,
+            take: limit,
+            orderBy: [
+                {
+                    deliveryDate: 'desc'
+                }
+            ]
+        });
+        
+        const ordersCount = await orderModel.count({
+            where: {
+                OR: [
+                    {
+                        orderStatus: 'completed'
+                    },
+                    {
+                        orderStatus: 'canceled'
+                    }
+                ]
+            }
+        });
+
+        const totalPages = Math.ceil(ordersCount/limit);
+
+        const pagination = {
+            totalItems: ordersCount,
+            nextPage: page >= totalPages - 1 ? null : page + 1,
+            limit,
+            totalPages
+        }
+        
+        res.status(200).json({
+            status: 'ok',
+            pagination,
+            orders
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
 const orderDetail = async (req, res, next) => {
     try {
         const orderId = parseInt(req.params.id);
@@ -180,4 +305,4 @@ const orderDetail = async (req, res, next) => {
     }
 }
 
-module.exports = { userPendingOrders, userConfirmedOrders, orderDetail };
+module.exports = { userPendingOrders, userConfirmedOrders, orderDetail, allPendingOrders, allConfirmedOrders };

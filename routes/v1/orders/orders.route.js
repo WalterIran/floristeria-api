@@ -23,4 +23,16 @@ router.get('/order-detail/:id',
     ordersController.orderDetail
 );
 
+router.get('/pending', 
+    //validatorHandler(requiredIdSchema, 'params'),
+    validatorHandler(limitOffsetSchema, 'query'),
+    ordersController.allPendingOrders
+);
+
+router.get('/confirmed',
+    //validatorHandler(requiredIdSchema, 'params'),
+    validatorHandler(limitOffsetSchema, 'query'),
+    ordersController.allConfirmedOrders
+);
+
 module.exports = router;

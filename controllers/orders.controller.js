@@ -8,8 +8,10 @@ const userPendingOrders = async (req, res, next) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
-
+        
         const orders = await orderModel.findMany({
+            skip: offset,
+            take: limit,
             where: {
                 AND: {
                     userId: id,
@@ -26,13 +28,14 @@ const userPendingOrders = async (req, res, next) => {
                     ]
                 }
             },
-            skip: offset,
-            take: limit,
             orderBy: [
                 {
                     deliveryDate: 'desc'
+                },
+                {
+                    billId: 'desc'
                 }
-            ]
+            ],
         });
 
         const ordersCount = await orderModel.count({
@@ -101,6 +104,9 @@ const userConfirmedOrders = async (req, res, next) => {
             orderBy: [
                 {
                     deliveryDate: 'desc'
+                },
+                {
+                    billId: 'desc'
                 }
             ]
         });

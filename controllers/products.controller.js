@@ -69,9 +69,8 @@ const createProduct = async (req, res, next) => {
         } = req.body;
 
         const productImage = req.files[0];
-        
         const result = await uploadFile(productImage);
-        await unlinkFile(productImage.path);
+        //await unlinkFile(productImage.path);
 
         const data = {
             productName,

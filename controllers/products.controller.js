@@ -1,11 +1,7 @@
 const boom = require('@hapi/boom');
-const fs = require('fs');
-const util = require('util');
 const prisma = require('../config/db');
 const { uploadFile } = require('../config/s3');
 const productModel = prisma.product;
-
-const unlinkFile = util.promisify(fs.unlink);
 
 //Search Product
 const findProduct = async (req, res, next) => {
@@ -68,10 +64,8 @@ const createProduct = async (req, res, next) => {
             totalRating 
         } = req.body;
 
-        const productImage = req.files[0];
+        const productImage = req.file;
         const result = await uploadFile(productImage);
-        //await unlinkFile(productImage.path);
-
         const data = {
             productName,
             productImgUrl: result.Location,

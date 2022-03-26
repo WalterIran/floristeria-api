@@ -3,17 +3,14 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
-const multer = require('multer');
 const { logErrors, errorHandler, boomErrorHandler, ormErrorHandler } = require('./middlewares/error.handler');
 
 require('./config/passport.config');
 const indexRouter = require('./routes/');
 
 const app = express();
-const upload = multer();
 
 app.use(logger('dev'));
-app.use(upload.any());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

@@ -171,7 +171,10 @@ const allPendingOrders = async (req, res, next) => {
             take: limit,
             orderBy: [
                 {
-                    deliveryDate: 'desc'
+                    deliveryDate: 'asc'
+                },
+                {
+                    billId: 'asc'
                 }
             ]
         });
@@ -234,7 +237,10 @@ const allConfirmedOrders = async (req, res, next) => {
             take: limit,
             orderBy: [
                 {
-                    deliveryDate: 'desc'
+                    deliveryDate: 'asc'
+                },
+                {
+                    billId: 'asc'
                 }
             ]
         });

@@ -145,11 +145,7 @@ const incrementQuantityCartDetails = async (req,res,next)=>{
         if(!cartDetails){
             throw boom.notFound();
         }
-<<<<<<< HEAD
-        res.send('Increment successfully')
-=======
         res.status(200).json(cartDetails);
->>>>>>> 58ec61d7fc0a679683384f263b3485d318f51b76
 
     } catch (error) {
         next(error);

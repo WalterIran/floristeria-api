@@ -5,12 +5,13 @@ const passport = require('passport');
 const validatorHandler = require('./../../../middlewares/validator.handler');
 
 //Schemas
-const { userRequiredId, registerCustomerSchema, updateCustomerInfoSchema, inactivateUser } = require('./../../../schemas/user.schema');
+const { userRequiredId, registerCustomerSchema, updateCustomerInfoSchema, inactivateUser, registerEmployeeSchema } = require('./../../../schemas/user.schema');
 
 //Controller
 const userController = require('./../../../controllers/users.controller');
 
 router.get('/all', userController.findAll);//Missing authentication
+router.get('/all-employee', userController.findAllEmployees);//Missing authentication
 
 router.get('/byid/:id',
     passport.authenticate('jwt', {session: false}),
@@ -23,11 +24,21 @@ router.post('/register-customer',
     userController.registerCustomer
 );
 
+router.post('/register-employee', 
+    validatorHandler(registerEmployeeSchema, 'body'),
+    userController.registerEmployee
+);
+
 router.patch('/update-customer/:id', 
     passport.authenticate('jwt', {session: false}),
     validatorHandler(userRequiredId, 'params'),
     validatorHandler(updateCustomerInfoSchema, 'body'),
-    userController.updateOneCustomer
+    userController.updateOneUser
+);
+
+router.put('/activate-user/:id',
+    validatorHandler(userRequiredId, 'params'),
+    userController.activateUser
 );
 
 router.delete('/inactivate-user/:id',

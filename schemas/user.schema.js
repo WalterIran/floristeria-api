@@ -42,4 +42,13 @@ const updateCustomerInfoSchema = Joi.object({
     address
 });
 
-module.exports = { userRequiredId, registerCustomerSchema, updateCustomerInfoSchema };
+//Schema to validate that client sends fields listed that are required
+const registerEmployeeSchema = Joi.object({
+    userName: userName.required(),
+    userLastname: userLastname.required(),
+    userRole: userRole.required(),
+    email: email.required(),
+    password: password.required(),
+    repeatPassword: repeatPassword.required()
+});
+module.exports = { userRequiredId, registerCustomerSchema, updateCustomerInfoSchema ,registerEmployeeSchema};

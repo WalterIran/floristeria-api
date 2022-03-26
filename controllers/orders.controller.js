@@ -317,4 +317,28 @@ const orderDetail = async (req, res, next) => {
     }
 }
 
-module.exports = { userPendingOrders, userConfirmedOrders, orderDetail, allPendingOrders, allConfirmedOrders };
+const updateOrderStatus = async (req, res, next)=>{
+    try {
+        const billId = parseInt(req.params.id);
+        
+        const orderStatus = await orderModel.update({
+            where:{
+                billId
+            },
+            data:{
+                orderStatus: req.body.status,
+                employeeId: req.body.employeeId,
+                updatedAt: new Date()
+            }
+        });
+        if(!orderStatus){
+            throw boom.notFound();
+        }
+        res.status(200).json("The order was modified successfully");
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = { userPendingOrders, userConfirmedOrders, orderDetail, allPendingOrders, allConfirmedOrders, updateOrderStatus };

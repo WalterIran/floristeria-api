@@ -10,7 +10,7 @@ require('./config/passport.config');
 const indexRouter = require('./routes/');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' })
+const upload = multer({ dest: '/app/uploads' })
 
 app.use(logger('dev'));
 app.use(upload.any());

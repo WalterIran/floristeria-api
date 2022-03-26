@@ -8,8 +8,10 @@ const userPendingOrders = async (req, res, next) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
-
+        
         const orders = await orderModel.findMany({
+            skip: offset,
+            take: limit,
             where: {
                 AND: {
                     userId: id,
@@ -26,13 +28,14 @@ const userPendingOrders = async (req, res, next) => {
                     ]
                 }
             },
-            skip: offset,
-            take: limit,
             orderBy: [
                 {
                     deliveryDate: 'desc'
+                },
+                {
+                    billId: 'desc'
                 }
-            ]
+            ],
         });
 
         const ordersCount = await orderModel.count({
@@ -101,6 +104,9 @@ const userConfirmedOrders = async (req, res, next) => {
             orderBy: [
                 {
                     deliveryDate: 'desc'
+                },
+                {
+                    billId: 'desc'
                 }
             ]
         });
@@ -166,8 +172,8 @@ const orderDetail = async (req, res, next) => {
             throw boom.notFound();
         }
 
-        order.subtotal = order.bill_detail.map(prod => parseFloat(prod.price)).reduce((prev, next) => prev + next);
-        order.total = order.subtotal + order.taxAmount;
+        order.subtotal = order.bill_detail.map(prod => parseFloat(prod.price * prod.quantity)).reduce((prev, next) => prev + next);
+        order.total = parseFloat(order.subtotal) + parseFloat(order.taxAmount);
 
         res.status(200).json({
             status: 'ok',

@@ -1,15 +1,25 @@
 const router = require('express').Router();
 const passport = require('passport');
+const multer = require('multer');
+
+const upload = multer();
 
 const validatorHandler = require('./../../../middlewares/validator.handler');
 const { productIdSchema, productDeleteSchema, createProductSchema, updateProductSchema  } = require('../../../schemas/products.schema');
 
 const productController = require('../../../controllers/products.controller');
 
-//localhost:5000/api/v1/products/byid/:id
 router.get('/byid/:id', 
     validatorHandler(productIdSchema, 'params'),
     productController.findProduct
+);
+
+router.get('/newest',
+    productController.findNewestProducts
+);
+
+router.get('/with-discount',
+    productController.findDiscountProducts
 );
 
 router.delete('/delete/:id',
@@ -20,15 +30,16 @@ router.delete('/delete/:id',
 
 router.post('/create',
 passport.authenticate('jwt', {session: false}),
-validatorHandler(createProductSchema, 'body'),
-productController.createProduct
+    upload.single('productImage'),
+    validatorHandler(createProductSchema, 'body'),
+    productController.createProduct
 );
 
 router.patch('/update/:id', 
     //passport.authenticate('jwt', {session: false}),
     validatorHandler(productIdSchema, 'params'),
     validatorHandler(updateProductSchema, 'body'),
-    productController.updateoneProduct
+    productController.updateOneProduct
 );
 
 module.exports = router;

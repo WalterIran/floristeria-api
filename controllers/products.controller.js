@@ -1,5 +1,6 @@
 const boom = require('@hapi/boom');
 const prisma = require('../config/db');
+const { uploadFile } = require('../config/s3');
 const productModel = prisma.product;
 
 //Search Product
@@ -54,12 +55,20 @@ const deleteProduct = async (req, res, next) => {
 //Create Product
 const createProduct = async (req, res, next) => {
     try {
-        const { productName , productDescriptionTitle, productDescription, productImgUrl,
-            price, discount, totalRating } = req.body;
+        const { 
+            productName, 
+            productDescriptionTitle, 
+            productDescription,
+            price, 
+            discount, 
+            totalRating 
+        } = req.body;
 
+        const productImage = req.file;
+        const result = await uploadFile(productImage);
         const data = {
             productName,
-            productImgUrl,
+            productImgUrl: result.Location,
             productDescriptionTitle,
             productDescription,
             price,
@@ -83,7 +92,7 @@ const createProduct = async (req, res, next) => {
 }
 
 //update Product 
-const updateoneProduct = async (req, res, next) => {
+const updateOneProduct = async (req, res, next) => {
  try{
      const id = parseInt(req.params.id);
      const changes = req.body;
@@ -237,4 +246,4 @@ const findDiscountProducts = async (req, res, next) => {
 }
 
 
-module.exports = { findProduct, findNewestProducts, findDiscountProducts, deleteProduct, createProduct, updateoneProduct};
+module.exports = { findProduct, findNewestProducts, findDiscountProducts, deleteProduct, createProduct, updateOneProduct};

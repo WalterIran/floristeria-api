@@ -61,11 +61,22 @@ const createProduct = async (req, res, next) => {
             productDescription,
             price, 
             discount, 
-            totalRating 
+            discountExpirationDate,
+            tagIds
         } = req.body;
 
+        const tagIdArr = JSON.parse(tagIds);
+
+        const tagTransaction = tagIdArr.map((tag) => {
+            return {
+                tagId: tag
+            }
+        });
+        
         const productImage = req.file;
+
         const result = await uploadFile(productImage);
+
         const data = {
             productName,
             productImgUrl: result.Location,
@@ -74,14 +85,19 @@ const createProduct = async (req, res, next) => {
             price,
             status: 'ACT',
             discount,
-            discountExpirationDate: new Date(),
+            discountExpirationDate: new Date(discountExpirationDate),
             createdAt: new Date(),
             updatedAt: new Date(),
-            totalRating
+            totalRating: 0
         }
 
         const product = await productModel.create({
-            data
+            data: {
+                ...data,
+                product_tag: {
+                    create: tagTransaction
+                }
+            }
         });
 
         res.status(200).json({status: 'ok', product});
@@ -93,30 +109,51 @@ const createProduct = async (req, res, next) => {
 
 //update Product 
 const updateOneProduct = async (req, res, next) => {
- try{
-     const id = parseInt(req.params.id);
-     const changes = req.body;
-     const product = await productModel.update({
-         where: {
-             id: id
-         },
-         data: {
-             ...changes,
-             updatedAt: new Date()
-         }
-     });
-     
-     if(!product){
-        throw boom.notFound();
-     }
-     
-     res.status(200).json({
-         status: 'ok',
-         result: product
-     });
- } catch(error){
-     next(error);
- }
+    try{
+        const id = parseInt(req.params.id);
+        const changes = req.body;
+        
+        const tagIdArr = JSON.parse(changes.tagIds);
+        delete changes['tagIds'];
+
+        const productImage = req.file;
+
+        const result = productImage && await uploadFile(productImage);
+
+        const tagTransaction = tagIdArr.map((tag) => {
+            return {
+                tagId: tag
+            }
+        });
+
+        const product = await productModel.update({
+            where: {
+                id: id
+            },
+            data: {
+                ...changes,
+                discountExpirationDate: new Date(changes.discountExpirationDate),
+                updatedAt: new Date(),
+                productImgUrl: result.Location,
+                product_tag: {
+                    deleteMany: {},
+                    create: tagTransaction
+                }
+            }
+        });
+        
+        if(!product){
+            throw boom.notFound();
+        }
+        
+        res.status(200).json({
+            status: 'ok',
+            result: product
+        });
+        //res.status(200).json({status: 'ok'});
+    } catch(error){
+        next(error);
+    }
 }
 
 //Get newest products

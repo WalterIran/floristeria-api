@@ -7,11 +7,12 @@ const productDescriptionTitle = Joi.string().max(255);
 const productDescription = Joi.string().max(800);
 const price = Joi.number().positive().precision(2);
 const status = Joi.string().valid('ACT','INA');
-const discount = Joi.number().positive().precision(2);
-const discountExpirationDate = Joi.date();
+const discount = Joi.number().precision(2);
+const discountExpirationDate = Joi.string();
 const createdAt = Joi.date();
 const updatedAt = Joi.date();
 const totalRating = Joi.number().positive().precision(2);
+const tagIds = Joi.string();
 
 //Schemas
 const productIdSchema = Joi.object({
@@ -22,13 +23,10 @@ const createProductSchema = Joi.object({
     productName: productName.required(),
     productDescription: productDescription.required(),
     productDescriptionTitle: productDescriptionTitle.required(),
-    price,
-    status,
+    price: price.required(),
     discount,
     discountExpirationDate,
-    totalRating,
-    createdAt,
-    updatedAt
+    tagIds
 });
 
 const productDeleteSchema = Joi.object({
@@ -41,7 +39,8 @@ const updateProductSchema = Joi.object({
     productDescription,
     price,
     discount,
-    totalRating
+    discountExpirationDate,
+    tagIds
 });
 
 module.exports = {productIdSchema, productDeleteSchema, createProductSchema, updateProductSchema};

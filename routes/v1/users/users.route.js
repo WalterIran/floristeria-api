@@ -5,7 +5,7 @@ const passport = require('passport');
 const validatorHandler = require('./../../../middlewares/validator.handler');
 
 //Schemas
-const { userRequiredId, registerCustomerSchema, updateCustomerInfoSchema, inactivateUser, registerEmployeeSchema } = require('./../../../schemas/user.schema');
+const { userRequiredId, registerCustomerSchema, updateCustomerInfoSchema, inactivateUser, registerEmployeeSchema,updateEmployeeInfoSchema } = require('./../../../schemas/user.schema');
 
 //Controller
 const userController = require('./../../../controllers/users.controller');
@@ -17,6 +17,12 @@ router.get('/byid/:id',
     passport.authenticate('jwt', {session: false}),
     validatorHandler(userRequiredId, 'params'),
     userController.findOneUser
+);
+
+router.get('/byemployeeid/:id',
+    passport.authenticate('jwt', {session: false}),
+    validatorHandler(userRequiredId, 'params'),
+    userController.findOneEmployee
 );
 
 router.post('/register-customer', 
@@ -35,12 +41,33 @@ router.patch('/update-customer/:id',
     validatorHandler(updateCustomerInfoSchema, 'body'),
     userController.updateOneUser
 );
+router.patch('/update-employee/:id', 
+    passport.authenticate('jwt', {session: false}),
+    validatorHandler(userRequiredId, 'params'),
+    validatorHandler(updateEmployeeInfoSchema, 'body'),
+    userController.updateOneUser
+);
 
 router.put('/activate-user/:id',
     validatorHandler(userRequiredId, 'params'),
     userController.activateUser
 );
 
+router.put('/role-employee/:id',
+    validatorHandler(userRequiredId, 'params'),
+    userController.userRoleEmployee
+);
+
+router.put('/role-admin/:id',
+    validatorHandler(userRequiredId, 'params'),
+    userController.userRoleAdmin
+);
+
+router.delete('/delete-user/:id',
+    passport.authenticate('jwt', {session: false}),
+    validatorHandler(userRequiredId, 'params'),
+    userController.deleteUser
+);
 router.delete('/inactivate-user/:id',
     passport.authenticate('jwt', {session: false}),
     validatorHandler(userRequiredId, 'params'),

@@ -263,4 +263,89 @@ const findAllEmployees = async (req,res,next) =>{
         next(error);
     }
 }
-module.exports = { findAll, findOneUser, findById, findByEmail, registerCustomer, updateOneUser, updateUser, inactivateUser, registerEmployee,activateUser,findAllEmployees };
+const findOneEmployee = async (req,res,next) =>{
+    try {
+        const id = parseInt(req.params.id);
+        const employee = await userModel.findMany({
+            where:{OR:[
+                {
+                    id,
+                    userRole:'admin'
+                },
+                {
+                    id,
+                    userRole:'employee'
+                }
+                ]}
+        });
+        if(employee == false){
+            throw boom.notFound();
+        }else{
+            res.send(employee);
+        }
+        res.send(employee);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+const userRoleEmployee = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const result = await userModel.update({
+            where: {
+                id
+            },
+            data: {
+                userRole: 'employee'
+            }
+        });
+        res.status(200).json({
+            status: 'ok',
+            msg: `User ${result.userName} ${result.userLastname} User role: Employee.`,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+const userRoleAdmin = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const result = await userModel.update({
+            where: {
+                id
+            },
+            data: {
+                userRole: 'admin'
+            }
+        });
+        res.status(200).json({
+            status: 'ok',
+            msg: `User ${result.userName} ${result.userLastname} User role: Administrator.`,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+const deleteUser = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const result = await userModel.delete({
+            where: {
+                id
+            }
+        });
+        res.status(200).json({
+            status: 'ok',
+            msg: `User ${result.userName} ${result.userLastname} Deleted successfuly.`,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+module.exports = { findAll, findOneUser, findById, findByEmail, registerCustomer, updateOneUser, updateUser, inactivateUser, registerEmployee,activateUser,findAllEmployees,findOneEmployee,userRoleEmployee,userRoleAdmin,deleteUser};

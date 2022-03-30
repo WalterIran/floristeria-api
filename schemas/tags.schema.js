@@ -5,7 +5,7 @@ const id = Joi.number().positive();
 const tagName = Joi.string().max(255);
 const tagDescription = Joi.string().max(1500);
 const discount = Joi.number().positive().precision(2).allow(null);
-const discountExpirationDate = Joi.date().allow(null);
+const discountExpirationDate = Joi.string().max(1500);
 
 //Schemas
 

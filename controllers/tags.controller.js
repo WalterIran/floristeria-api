@@ -1,8 +1,9 @@
 const boom = require('@hapi/boom');
+const { user } = require('../config/db');
 const prisma = require('../config/db');
 const tagsModel = prisma.tag;
 
-const findAllTags = async (req,res,next) =>{
+const findAllTags = async (req, res, next) => {
     try {
         const tag = await tagsModel.findMany();
         res.status(200).json(tag);
@@ -12,8 +13,30 @@ const findAllTags = async (req,res,next) =>{
     }
 }
 
+//Pendiente a realiazar
+const finOneTag = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.tagId);
+        const tag = await tagsModel.findUnique({
+            where: {
+                tagId: id
+            }
+        });
+
+        if (!tag) {
+            throw boom.notFound();
+        }
+
+        res.send(tag);
+
+    } catch (error) {
+        console.log(error)
+        next(error);
+    }
+}
+
 const updateTag = async (req, res, next) => {
-    try{
+    try {
         const id = parseInt(req.params.tagId);
         const changes = req.body;
         const Tag = await tagsModel.update({
@@ -24,24 +47,24 @@ const updateTag = async (req, res, next) => {
                 ...changes,
             }
         });
-        
-        if(!Tag){
-           throw boom.notFound();
+
+        if (!Tag) {
+            throw boom.notFound();
         }
-        
+
         res.status(200).json({
             status: 'ok',
             result: Tag
         });
-    } catch(error){
+    } catch (error) {
         next(error);
     }
-   }
+}
 
-   //Create Tags
+//Create Tags
 const createTag = async (req, res, next) => {
     try {
-        const { tagName , tagDescription, discount } = req.body;
+        const { tagName, tagDescription, discount } = req.body;
 
         const data = {
             tagName,
@@ -54,11 +77,11 @@ const createTag = async (req, res, next) => {
             data
         });
 
-        res.status(200).json({status: 'ok', Tag});
-        }catch (error) {
+        res.status(200).json({ status: 'ok', Tag });
+    } catch (error) {
         console.error(error);
         next(error);
     }
 }
 
-module.exports = {findAllTags, updateTag, createTag};
+module.exports = { findAllTags, updateTag, createTag, finOneTag };

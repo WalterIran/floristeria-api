@@ -2,7 +2,7 @@ const router = require('express').Router();
 const passport = require('passport');
 
 const validatorHandler = require('./../../../middlewares/validator.handler');
-const {TagsIdSchema, updateTagsSchema, createTagsSchema} = require('../../../schemas/tags.schema');
+const { TagsIdSchema, updateTagsSchema, createTagsSchema } = require('../../../schemas/tags.schema');
 
 const tagsController = require('../../../controllers/tags.controller');
 
@@ -11,15 +11,20 @@ router.get('/listTags',
     tagsController.findAllTags
 );
 
-router.patch('/updateTag/:tagId', 
+router.patch('/updateTag/:tagId',
     validatorHandler(TagsIdSchema, 'params'),
     validatorHandler(updateTagsSchema, 'body'),
     tagsController.updateTag
 );
+
+router.get('/findtag/:tagId',
+    validatorHandler(TagsIdSchema, 'params'),
+    tagsController.finOneTag
+)
 
 router.post('/createTags',
     validatorHandler(createTagsSchema, 'body'),
     tagsController.createTag
 );
 
-module.exports  = router;
+module.exports = router;

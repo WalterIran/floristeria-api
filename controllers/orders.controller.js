@@ -186,4 +186,23 @@ const orderDetail = async (req, res, next) => {
     }
 }
 
-module.exports = { userPendingOrders, userConfirmedOrders, orderDetail };
+const getSellsStatistics = async (req, res, next) => {
+    try {
+        const sells = await prisma.$queryRaw`
+            SELECT
+            DATE_FORMAT(b.created_at, '%b') as 'month',
+            sum(bd.quantity * bd.price) as 'sells'
+            FROM bill as b
+            inner join bill_detail as bd on bd.bill_id = b.bill_id
+            where b.created_at > now() - INTERVAL 12 month AND order_status != 'canceled'
+            group by DATE_FORMAT(b.created_at, '%b')
+            ORDER BY b.created_at asc;
+        `;
+
+        res.status(200).json({status: 'ok', sells});
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = { userPendingOrders, userConfirmedOrders, orderDetail, getSellsStatistics };

@@ -61,4 +61,24 @@ const createTag = async (req, res, next) => {
     }
 }
 
-module.exports = {findAllTags, updateTag, createTag};
+const getTopSoldTags = async (req, res, next) => {
+    try {
+        const tags = await prisma.$queryRaw`
+            SELECT 
+            t.tag_name,
+            count(bd.bill_id) as 'sells'
+            FROM tag as t
+            inner join product_tag as pt on pt.tag_id = t.tag_id
+            inner join product as p on p.product_id = pt.product_id
+            inner join bill_detail as bd on bd.product_id = p.product_id
+            group by t.tag_name
+            order by sells desc
+            LIMIT 5;
+        `;
+        res.status(200).json({status: 'ok', tags});
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = {findAllTags, updateTag, createTag, getTopSoldTags};

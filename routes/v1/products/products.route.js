@@ -9,6 +9,10 @@ const { productIdSchema, productDeleteSchema, createProductSchema, updateProduct
 
 const productController = require('../../../controllers/products.controller');
 
+router.get('/all',
+    productController.findAllProducts
+);
+
 router.get('/byid/:id', 
     validatorHandler(productIdSchema, 'params'),
     productController.findProduct

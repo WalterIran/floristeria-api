@@ -3,6 +3,55 @@ const prisma = require('../config/db');
 const { uploadFile } = require('../config/s3');
 const productModel = prisma.product;
 
+const findAllProducts = async (req,res,next) =>{
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const [products, productsCount] = await prisma.$transaction([
+            productModel.findMany({
+                skip: offset,
+                take: limit,
+                orderBy: [
+                    {
+                        createdAt: 'asc'
+                    },
+                    {
+                        id: 'asc'
+                    }
+                ],
+                include: {
+                    product_tag:{
+                        include:{
+                            tag: true
+                        }
+                    }
+                }
+            }),
+            productModel.count(),
+        ]);
+
+        const totalPages = Math.ceil(productsCount/limit);
+
+        const pagination = {
+            totalItems: productsCount,
+            nextPage: page >= totalPages ? null : page + 1,
+            limit,
+            totalPages
+        }
+
+        res.status(200).json({
+            status: 'ok',
+            pagination, 
+            products
+        });
+    } catch (error) {
+        console.log(error)
+        next(error);
+    }
+}
+
 //Search Product
 const findProduct = async (req, res, next) => {
     try {
@@ -119,6 +168,9 @@ const updateOneProduct = async (req, res, next) => {
         const productImage = req.file;
 
         const result = productImage && await uploadFile(productImage);
+        if(result){
+            changes.productImgUrl = result.Location;
+        }
 
         const tagTransaction = tagIdArr.map((tag) => {
             return {
@@ -134,7 +186,6 @@ const updateOneProduct = async (req, res, next) => {
                 ...changes,
                 discountExpirationDate: new Date(changes.discountExpirationDate),
                 updatedAt: new Date(),
-                productImgUrl: result.Location,
                 product_tag: {
                     deleteMany: {},
                     create: tagTransaction
@@ -283,4 +334,4 @@ const findDiscountProducts = async (req, res, next) => {
 }
 
 
-module.exports = { findProduct, findNewestProducts, findDiscountProducts, deleteProduct, createProduct, updateOneProduct};
+module.exports = { findAllProducts, findProduct, findNewestProducts, findDiscountProducts, deleteProduct, createProduct, updateOneProduct};

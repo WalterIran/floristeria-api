@@ -22,4 +22,8 @@ router.post('/createTags',
     tagsController.createTag
 );
 
+router.get('/top-sold',
+    tagsController.getTopSoldTags
+);
+
 module.exports  = router;

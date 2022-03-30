@@ -117,7 +117,7 @@ const updateOneUser = async (req, res, next) => {
         changes.birthDate = new Date(changes.birthDate);
 
         const user = await updateUser(id, changes);
-
+        
         if(!user) {
             throw boom.notFound();
         }

@@ -93,7 +93,7 @@ const registerCustomer = async (req, res, next) => {
         const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
         const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-        user = await updateCustomer(user.id, {refreshToken: hashRefreshToken});
+        user = await updateUser(user.id, {refreshToken: hashRefreshToken});
         
         delete user.password;
         delete user.refreshToken;
@@ -110,13 +110,13 @@ const registerCustomer = async (req, res, next) => {
 }
 
 //Function to update one customer with response to client
-const updateOneCustomer = async (req, res, next) => {
+const updateOneUser = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id);
         const changes = req.body;
         changes.birthDate = new Date(changes.birthDate);
 
-        const user = await updateCustomer(id, changes);
+        const user = await updateUser(id, changes);
 
         if(!user) {
             throw boom.notFound();
@@ -135,7 +135,7 @@ const updateOneCustomer = async (req, res, next) => {
 }
 
 //Function to update customer information with prisma
-const updateCustomer = async (id, changes) => {
+const updateUser= async (id, changes) => {
     const user = await userModel.update({
         where: {
             id: id
@@ -179,4 +179,173 @@ const inactivateUser = async (req, res, next) => {
     }
 }
 
-module.exports = { findAll, findOneUser, findById, findByEmail, registerCustomer, updateOneCustomer, updateCustomer, inactivateUser };
+//Function to register user on database
+const registerEmployee = async (req, res, next) => {
+    try {
+        const hash = await bcrypt.hash(req.body.password, 10);
+        const { userName , userLastname, email,userRole } = req.body;
+        const data = {
+            userName,
+            userLastname,
+            email,
+            password: hash,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userRole,
+            userStatus: 'ACT'
+        }
+
+        let user = await userModel.create({
+            data
+        });
+
+        const payload = {
+            userId: user.id,
+            role: user.userRole
+        }
+
+        const accessToken = jwt.sign(payload, secretAccessKey, {expiresIn: '20m'});
+        const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
+        const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
+
+        user = await updateUser(user.id, {refreshToken: hashRefreshToken});
+        
+        delete user.password;
+        delete user.refreshToken;
+
+        res.status(200).json({
+            status: 'ok',
+            user,
+            accessToken,
+            refreshToken
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+const activateUser = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const result = await userModel.update({
+            where: {
+                id
+            },
+            data: {
+                userStatus: 'ACT'
+            }
+        });
+        res.status(200).json({
+            status: 'ok',
+            msg: `User ${result.userName} ${result.userLastname} Activated successfully`,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+const findAllEmployees = async (req,res,next) =>{
+    try {
+        const employees = await userModel.findMany({
+            where:{OR:[
+            {
+                userRole:'admin'
+            },
+            {
+                userRole:'employee'
+            }
+            ]}
+        });
+        res.send(employees);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+const findOneEmployee = async (req,res,next) =>{
+    try {
+        const id = parseInt(req.params.id);
+        const employee = await userModel.findMany({
+            where:{OR:[
+                {
+                    id,
+                    userRole:'admin'
+                },
+                {
+                    id,
+                    userRole:'employee'
+                }
+                ]}
+        });
+        if(employee == false){
+            throw boom.notFound();
+        }else{
+            res.send(employee);
+        }
+        res.send(employee);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+const userRoleEmployee = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const result = await userModel.update({
+            where: {
+                id
+            },
+            data: {
+                userRole: 'employee'
+            }
+        });
+        res.status(200).json({
+            status: 'ok',
+            msg: `User ${result.userName} ${result.userLastname} User role: Employee.`,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+const userRoleAdmin = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const result = await userModel.update({
+            where: {
+                id
+            },
+            data: {
+                userRole: 'admin'
+            }
+        });
+        res.status(200).json({
+            status: 'ok',
+            msg: `User ${result.userName} ${result.userLastname} User role: Administrator.`,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+const deleteUser = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const result = await userModel.delete({
+            where: {
+                id
+            }
+        });
+        res.status(200).json({
+            status: 'ok',
+            msg: `User ${result.userName} ${result.userLastname} Deleted successfuly.`,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+module.exports = { findAll, findOneUser, findById, findByEmail, registerCustomer, updateOneUser, updateUser, inactivateUser, registerEmployee,activateUser,findAllEmployees,findOneEmployee,userRoleEmployee,userRoleAdmin,deleteUser};

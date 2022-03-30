@@ -31,7 +31,7 @@ const mobileLogin = async (req, res, next) => {
         const refreshToken = jwt.sign(payload, secretRefreshKey, {expiresIn: '10d'});
         const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-        await userController.updateCustomer(user.id, {refreshToken: hashRefreshToken});
+        await userController.updateUser(user.id, {refreshToken: hashRefreshToken});
 
         delete user.password;
         delete user.refreshToken;

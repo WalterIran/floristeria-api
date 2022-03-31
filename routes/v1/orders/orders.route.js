@@ -3,7 +3,7 @@ const passport = require('passport');
 
 const ordersController = require('../../../controllers/orders.controller');
 
-const { limitOffsetSchema, requiredIdSchema } = require('../../../schemas/orders.schema');
+const { limitOffsetSchema, requiredIdSchema, requiredStatus } = require('../../../schemas/orders.schema');
 const validatorHandler = require('./../../../middlewares/validator.handler');
 
 router.get('/byuser/:id/pending', 
@@ -26,5 +26,21 @@ router.get('/order-detail/:id',
 router.get('/sells',
     ordersController.getSellsStatistics
 );
+
+router.get('/pending', 
+    validatorHandler(limitOffsetSchema, 'query'),
+    ordersController.allPendingOrders
+);
+
+router.get('/confirmed',
+    validatorHandler(limitOffsetSchema, 'query'),
+    ordersController.allConfirmedOrders
+);
+
+router.put('/updatestatus/:id',
+    validatorHandler(requiredIdSchema, 'params'),
+    validatorHandler(requiredStatus, 'body'),
+    ordersController.updateOrderStatus
+)
 
 module.exports = router;

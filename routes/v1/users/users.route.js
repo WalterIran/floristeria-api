@@ -13,6 +13,10 @@ const userController = require('./../../../controllers/users.controller');
 router.get('/all', userController.findAll);//Missing authentication
 router.get('/all-employee', userController.findAllEmployees);//Missing authentication
 
+router.get('/customers-growth',
+    userController.getUsersGrowth
+);
+
 router.get('/byid/:id',
     passport.authenticate('jwt', {session: false}),
     validatorHandler(userRequiredId, 'params'),

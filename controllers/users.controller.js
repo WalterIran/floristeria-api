@@ -348,4 +348,40 @@ const deleteUser = async (req, res, next) => {
         next(error);
     }
 }
-module.exports = { findAll, findOneUser, findById, findByEmail, registerCustomer, updateOneUser, updateUser, inactivateUser, registerEmployee,activateUser,findAllEmployees,findOneEmployee,userRoleEmployee,userRoleAdmin,deleteUser};
+
+const getUsersGrowth = async (req, res, next) => {
+    try {
+        const months = await prisma.$queryRaw`
+            SELECT
+            DATE_FORMAT(created_at, '%b') as 'month',
+            count(user_id) as 'total'
+            FROM user
+            WHERE user_role = 'customer' AND created_at > now() - INTERVAL 12 month
+            GROUP BY monthname(created_at)
+            ORDER BY created_at asc;
+        `;
+
+        res.status(200).json({status: 'ok', months});
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = { 
+    findAll,
+    findOneUser,
+    findById,
+    findByEmail,
+    getUsersGrowth,
+    registerCustomer,
+    updateOneUser,
+    updateUser,
+    inactivateUser,
+    registerEmployee,
+    activateUser,
+    findAllEmployees,
+    findOneEmployee,
+    userRoleEmployee,
+    userRoleAdmin,
+    deleteUser
+};

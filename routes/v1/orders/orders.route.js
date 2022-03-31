@@ -23,4 +23,8 @@ router.get('/order-detail/:id',
     ordersController.orderDetail
 );
 
+router.get('/sells',
+    ordersController.getSellsStatistics
+);
+
 module.exports = router;

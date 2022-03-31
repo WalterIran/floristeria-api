@@ -9,6 +9,10 @@ const { productIdSchema, productDeleteSchema, createProductSchema, updateProduct
 
 const productController = require('../../../controllers/products.controller');
 
+router.get('/all',
+    productController.findAllProducts
+);
+
 router.get('/byid/:id', 
     validatorHandler(productIdSchema, 'params'),
     productController.findProduct
@@ -29,7 +33,7 @@ router.delete('/delete/:id',
 );
 
 router.post('/create',
-passport.authenticate('jwt', {session: false}),
+    passport.authenticate('jwt', {session: false}),
     upload.single('productImage'),
     validatorHandler(createProductSchema, 'body'),
     productController.createProduct
@@ -37,6 +41,7 @@ passport.authenticate('jwt', {session: false}),
 
 router.patch('/update/:id', 
     //passport.authenticate('jwt', {session: false}),
+    upload.single('productImage'),
     validatorHandler(productIdSchema, 'params'),
     validatorHandler(updateProductSchema, 'body'),
     productController.updateOneProduct

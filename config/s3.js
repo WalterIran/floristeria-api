@@ -16,8 +16,6 @@ const s3 = new S3({
 
 // uploads a file to s3
 exports.uploadFile = (file) => {
-    //const fileStream = fs.createReadStream(file.path)
-    //const fileStream = fs.createReadStream(Readable.from(file.buffer.toString()));
     const fileType = file.mimetype.split('/')[1];
     const uploadParams = {
         Bucket: bucketName,

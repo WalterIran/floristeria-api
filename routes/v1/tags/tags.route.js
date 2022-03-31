@@ -33,3 +33,8 @@ router.delete('/deleteTag/:tagId',
 );
 
 module.exports = router;
+router.get('/top-sold',
+    tagsController.getTopSoldTags
+);
+
+module.exports  = router;

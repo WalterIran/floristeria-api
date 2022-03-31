@@ -4,7 +4,7 @@ const Joi = require('joi');
 const id = Joi.number().positive();
 const tagName = Joi.string().max(255);
 const tagDescription = Joi.string().max(1500);
-const discount = Joi.number().positive().precision(2).allow(null);
+const discount = Joi.number().precision(2).allow(null);
 const discountExpirationDate = Joi.string().max(1500);
 
 //Schemas

@@ -27,4 +27,9 @@ router.post('/createTags',
     tagsController.createTag
 );
 
+router.delete('/deleteTag/:tagId',
+    validatorHandler(TagsIdSchema, 'params'),
+    tagsController.deleteTag
+);
+
 module.exports = router;

@@ -84,4 +84,24 @@ const createTag = async (req, res, next) => {
     }
 }
 
-module.exports = { findAllTags, updateTag, createTag, finOneTag };
+//Delete
+
+const deleteTag = async (req,res,next) => {
+    try {
+        const id = parseInt(req.params.tagId);
+        const result = await tagsModel.delete({
+            where: {
+                tagId: id
+            }
+        });
+        res.status(200).json({
+            status: 'ok',
+            msg: `Tag ${result.tagName} Deleted successfuly.`,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+module.exports = { deleteTag,findAllTags, updateTag, createTag, finOneTag };
